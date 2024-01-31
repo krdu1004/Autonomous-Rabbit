@@ -4,9 +4,9 @@ import time
 from matplotlib import pyplot as plt
 from scipy.optimize import minimize
 from scipy import stats
-from ltsfit.ltsfit import ltsfit
+# from ltsfit.ltsfit import ltsfit
 
-def line_detection(image):
+def line_detection(image,set_width,cut_top):
     def auto_canny(image, sigma=0.33):
         # compute the median of the single channel pixel intensities
         v = np.median(image)
@@ -82,15 +82,15 @@ def line_detection(image):
             if theta < np.pi/3:
                 line_left.append([x1, y1])
                 line_left.append([x2, y2])
-                cv.line(image,(x1,y1),(x2,y2),(0,255,0),2)
+                cv2.line(image,(x1,y1),(x2,y2),(0,255,0),2)
                 left_rho_theta.append([rho,theta])
             elif theta > 2*np.pi/3:
                 line_right.append([x1, y1])
                 line_right.append([x2, y2])
-                cv.line(image,(x1,y1),(x2,y2),(0,0,255),2)
+                cv2.line(image,(x1,y1),(x2,y2),(0,0,255),2)
                 right_rho_theta.append([rho,theta])
             else:   # Not left or right lane:
-                # cv.line(image,(x1,y1),(x2,y2),(255,0,0),2)
+                # cv2.line(image,(x1,y1),(x2,y2),(255,0,0),2)
                 pass
             
     
@@ -108,7 +108,7 @@ def line_detection(image):
         return error
 
     def draw_line(a,b,rgb,width=2,image=image):
-        cv.line(image,(0,int(b)),(2000,int(a*2000+b)),rgb,width)
+        cv2.line(image,(0,int(b)),(2000,int(a*2000+b)),rgb,width)
 
     def rho_theta_to_ab(rho, theta):
         # Convert polar coordinates to Cartesian form ax + b
@@ -218,7 +218,7 @@ def line_detection(image):
     optimal_params = result.x
     a1_optimal, b1_optimal = optimal_params
     print(f"Line: y = {a1_optimal:.2f}x + {b1_optimal:.2f} in {end-start:-2f}")
-    cv.line(image,(0,int(b1_optimal)),(2000,int(a1_optimal*2000+b1_optimal)),(0,220,0),2)
+    cv2.line(image,(0,int(b1_optimal)),(2000,int(a1_optimal*2000+b1_optimal)),(0,220,0),2)
     
     start = time.time()
     result = minimize(error_function, initial_params, args=(line_right,))
@@ -228,36 +228,36 @@ def line_detection(image):
     optimal_params = result.x
     a2_optimal, b2_optimal = optimal_params
     print(f"Line: y = {a2_optimal:.2f}x + {b2_optimal:.2f}")
-    cv.line(image,(0,int(b2_optimal)),(2000,int(a2_optimal*2000+b2_optimal)),(0,220,0),2)
+    cv2.line(image,(0,int(b2_optimal)),(2000,int(a2_optimal*2000+b2_optimal)),(0,220,0),2)
 
     # -------------------------------------------
 
     # Robust line fit
 
-    sigx1=np.ones_like(x1)
-    sigy1=np.ones_like(y1)
-    sigx2=np.ones_like(x2)
-    sigy2=np.ones_like(y2)
-    try:
-        s=time.time()
-        p = ltsfit(x1, y1, sigx1, sigy1, clip=2.6, corr=True, epsy=True,
-                frac=None, label='Fitted', label_clip='Clipped',
-                legend=True, pivot=None, plot=True, text=True)
-        b1_optimal, a1_optimal = p.coef
-        tid_robust.append(time.time()-s)
-        print(f"Best fitting parameters: {p.coef} in {time.time()-s} seconds")
-        cv.line(image,(0,int(b1_optimal)),(2000,int(a1_optimal*2000+b1_optimal)),(0,0,0),4)
+    # sigx1=np.ones_like(x1)
+    # sigy1=np.ones_like(y1)
+    # sigx2=np.ones_like(x2)
+    # sigy2=np.ones_like(y2)
+    # try:
+    #     s=time.time()
+    #     p = ltsfit(x1, y1, sigx1, sigy1, clip=2.6, corr=True, epsy=True,
+    #             frac=None, label='Fitted', label_clip='Clipped',
+    #             legend=True, pivot=None, plot=True, text=True)
+    #     b1_optimal, a1_optimal = p.coef
+    #     tid_robust.append(time.time()-s)
+    #     print(f"Best fitting parameters: {p.coef} in {time.time()-s} seconds")
+    #     cv2.line(image,(0,int(b1_optimal)),(2000,int(a1_optimal*2000+b1_optimal)),(0,0,0),4)
 
-        s=time.time()
-        p = ltsfit(x2, y2, sigx2, sigy2, clip=2.6, corr=True, epsy=True,
-                frac=None, label='Fitted', label_clip='Clipped',
-                legend=True, pivot=None, plot=True, text=True)
-        b2_optimal, a2_optimal = p.coef
-        tid_robust.append(time.time()-s)
-        print(f"Best fitting parameters: {p.coef} in {time.time()-s} seconds")
-        cv.line(image,(0,int(b2_optimal)),(2000,int(a2_optimal*2000+b2_optimal)),(0,0,0),4)
-    except:     # Wierd bug that crashes sometimes
-        pass
+    #     s=time.time()
+    #     p = ltsfit(x2, y2, sigx2, sigy2, clip=2.6, corr=True, epsy=True,
+    #             frac=None, label='Fitted', label_clip='Clipped',
+    #             legend=True, pivot=None, plot=True, text=True)
+    #     b2_optimal, a2_optimal = p.coef
+    #     tid_robust.append(time.time()-s)
+    #     print(f"Best fitting parameters: {p.coef} in {time.time()-s} seconds")
+    #     cv2.line(image,(0,int(b2_optimal)),(2000,int(a2_optimal*2000+b2_optimal)),(0,0,0),4)
+    # except:     # Wierd bug that crashes sometimes
+    #     pass
     # ------------------------------------------
     
     return a1_optimal, b1_optimal, a2_optimal, b2_optimal

@@ -5,7 +5,7 @@ import statistics
 from matplotlib import pyplot as plt
 
 
-def steering_angle_controller(a1_optimal, b1_optimal, a2_optimal, b2_optimal):
+def steering_angle_controller(image, angle_pid, position_pid, a1_optimal, b1_optimal, a2_optimal, b2_optimal):
     def find_intersection(a1, b1, a2, b2):
         if a1 == a2:
             # The lines are parallel and will never intersect
@@ -26,6 +26,7 @@ def steering_angle_controller(a1_optimal, b1_optimal, a2_optimal, b2_optimal):
     print(x_intersect, y_intersect)
     image = cv2.circle(image, (int(x_intersect),int(y_intersect)), radius=5, color=(255, 0, 0), thickness=-1)   
 
+    height, width, depth = image.shape
     y_robot = height
     x_robot = width/2
 
@@ -33,7 +34,7 @@ def steering_angle_controller(a1_optimal, b1_optimal, a2_optimal, b2_optimal):
     image = cv2.circle(image, (x_center_of_lane_at_bottom,y_robot), radius=100, color=(255, 0, 0), thickness=-1)   
 
     # Center line for lane
-    cv.line(image,(x_center_of_lane_at_bottom,y_robot),(int(x_intersect),int(y_intersect)),(0,0,255),2)
+    cv2.line(image,(x_center_of_lane_at_bottom,y_robot),(int(x_intersect),int(y_intersect)),(0,0,255),2)
    
     # Angle between robot and aiming point(Vanishing point)
     angle_radians = math.atan2(y_intersect - y_robot, x_intersect - x_robot)
@@ -44,39 +45,18 @@ def steering_angle_controller(a1_optimal, b1_optimal, a2_optimal, b2_optimal):
     position_control_signal = position_pid.compute(x_center_of_lane_at_bottom)
     steering_angle = angle_control_signal + position_control_signal
 
-    # not used:
-    angle_history.append(angle)
-    position_history.append(x_center_of_lane_at_bottom)
-
     print("angle and pos:")
     print(angle, x_center_of_lane_at_bottom)
     print("Angle control, position control and steering angle:")
     print(angle_control_signal," + ", position_control_signal," = ", steering_angle)
 
-    # Combine and display the result
-    hori1 = np.concatenate((copy_image, image), axis=1) 
-    hori2 = np.concatenate((gray, edges), axis=1) 
+
   
-    cv2.imshow("Edges", hori2)
     cv2.imshow("Image lines", image)
     cv2.imwrite("lines.jpg", image)
     cv2.waitKey(0)
 
     cv2.destroyAllWindows()
 
-    def print_tid(l,name="List"):
-        print(name+": ")
-        print("len: ", len(l))
-        print("Mean: ", statistics.mean(l))
-        print("stdev: ", statistics.stdev(l))
-        print()
-    
-    print_tid(tid_ls, "Least Squares")
-    print_tid(tid_polyfit, "Polyfit")
-    print_tid(tid_linregres, "Linregres")
-    print_tid(tid_manual, "Manual")
-    print_tid(tid_robust, "LTS")
-    print_tid(tid_median, "Median")
-    print_tid(tid_nn_alternativ,"nn alternativ")
 
     return steering_angle
