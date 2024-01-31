@@ -17,17 +17,7 @@ def line_detection(image):
         edged = cv2.Canny(image, lower, upper)
         # return the edged image
         print(lower, upper)
-        return edged
-
-
-
-    # Parameters to change:
-    videofolder = "bilder/video_short"
-    set_width = 640
-    cut_top = 1/4   # 0 for no trimming, max is 1.
-    # PIDs:
-    angle_setpoint = -90  # The desired angle you want to maintain
-    position_setpoint = set_width/2  # The desired position you want to reach
+        return edged    
     
 
     # Timing arrays:
@@ -42,11 +32,7 @@ def line_detection(image):
     tid_nn_alternativ = []
 
 
-    print(filename)
-    image = cv2.imread(videofolder+"/"+filename)
-    # image = cv2.imread("bilder/oya3.jpg")
     
-    assert image is not None, "file could not be read, check with os.path.exists()"
     
     height, width, depth = image.shape
     height, width, depth = image.shape
