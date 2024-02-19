@@ -5,7 +5,7 @@ import time
 import numpy as np
 import cv2
 
-def camera_init(fps=30, resolution=sl.RESOLUTION.AUTO):
+def camera_init(fps=30, resolution=sl.RESOLUTION.SVGA):
     init = sl.InitParameters()
     camera = sl.Camera()
     if not camera.is_opened():
@@ -23,7 +23,8 @@ def camera_init(fps=30, resolution=sl.RESOLUTION.AUTO):
     init.camera_resolution = resolution
     #init.camera_resolution = sl.RESOLUTION.RESOLUTION_HD1080
     init.camera_fps = fps  # The framerate is lowered to avoid any USB3 bandwidth issues
-
+    init.coordinate_units = sl.UNIT.METER
+    init.coordinate_system = sl.COORDINATE_SYSTEM.RIGHT_HANDED_Y_UP
     camera = sl.Camera()
     cam_status = camera.open(init)
 
@@ -38,20 +39,19 @@ def get_camera_image(mat, camera, runtime):    # Obtain camera image and get tim
         # camera.retrieve_image(mat, sl.VIEW.SIDE_BY_SIDE)
         camera.retrieve_image(mat, sl.VIEW.LEFT)
         img = mat.get_data()
+        return img
 
         img_name = 'images/filename_{}.jpg'.format(time.time())
         name = "kake"
         # Saving as numpy array
-        cv2.imshow(name, img)
-        t1 = time.process_time()
-        countdown = 5
-        # while img != sl.ERROR_CODE.SUCCESS or countdown > 0:
-        while countdown > 0:
-            print(img)
-            img_write = mat.write(img_name)
-            countdown -= 1
-            if img_write == sl.ERROR_CODE.SUCCESS:
-                break
-        return img
-        print("Saving file took {} ms".format((time.process_time()-t1)*1e3))
+        # cv2.imshow(name, img)
+        # t1 = time.process_time()
+        # countdown = 5
+        # # while img != sl.ERROR_CODE.SUCCESS or countdown > 0:
+        # while countdown > 0:
+        #     img_write = mat.write(img_name)
+        #     countdown -= 1
+        #     if img_write == sl.ERROR_CODE.SUCCESS:
+        #         break
+        # print("Saving file took {} ms".format((time.process_time()-t1)*1e3))
     return None

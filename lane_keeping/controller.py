@@ -5,12 +5,12 @@ import statistics
 from matplotlib import pyplot as plt
 
 
-def steering_angle_controller(image, angle_pid, position_pid, a1_optimal, b1_optimal, a2_optimal, b2_optimal):
+def steering_angle_controller(image, angle_pid, position_pid, lane_lines, debug=False, show_image=False):
+    a1_optimal, b1_optimal, a2_optimal, b2_optimal = lane_lines
     def find_intersection(a1, b1, a2, b2):
         if a1 == a2:
             # The lines are parallel and will never intersect
             return None
-
         x = (b2 - b1) / (a1 - a2)
         y = a1 * x + b1
         return round(x), round(y)
@@ -20,21 +20,14 @@ def steering_angle_controller(image, angle_pid, position_pid, a1_optimal, b1_opt
         x2 = (y_constant - b2) / a2 if a2 != 0 else None
 
         return (x1+x2) / 2
-    
 
     x_intersect, y_intersect = find_intersection(a1_optimal, b1_optimal, a2_optimal, b2_optimal)
-    print(x_intersect, y_intersect)
-    image = cv2.circle(image, (int(x_intersect),int(y_intersect)), radius=5, color=(255, 0, 0), thickness=-1)   
 
-    height, width, depth = image.shape
+    height, width, _ = image.shape
     y_robot = height
     x_robot = width/2
 
     x_center_of_lane_at_bottom = int(find_intersection_with_y_equals_constant(a1_optimal, b1_optimal, a2_optimal, b2_optimal, y_robot))
-    image = cv2.circle(image, (x_center_of_lane_at_bottom,y_robot), radius=100, color=(255, 0, 0), thickness=-1)   
-
-    # Center line for lane
-    cv2.line(image,(x_center_of_lane_at_bottom,y_robot),(int(x_intersect),int(y_intersect)),(0,0,255),2)
    
     # Angle between robot and aiming point(Vanishing point)
     angle_radians = math.atan2(y_intersect - y_robot, x_intersect - x_robot)
@@ -45,18 +38,23 @@ def steering_angle_controller(image, angle_pid, position_pid, a1_optimal, b1_opt
     position_control_signal = position_pid.compute(x_center_of_lane_at_bottom)
     steering_angle = angle_control_signal + position_control_signal
 
-    print("angle and pos:")
-    print(angle, x_center_of_lane_at_bottom)
-    print("Angle control, position control and steering angle:")
-    print(angle_control_signal," + ", position_control_signal," = ", steering_angle)
+    if debug:
+        print("angle and pos:")
+        print(angle, x_center_of_lane_at_bottom)
+        print("Angle control, position control and steering angle:")
+        print(angle_control_signal," + ", position_control_signal," = ", steering_angle)
 
+    if show_image:
+        image = cv2.circle(image, (int(x_intersect),int(y_intersect)), radius=5, color=(255, 0, 0), thickness=-1)   
+        image = cv2.circle(image, (x_center_of_lane_at_bottom,y_robot), radius=100, color=(255, 0, 0), thickness=-1)   
+        # Center line for lane
+        cv2.line(image,(x_center_of_lane_at_bottom,y_robot),(int(x_intersect),int(y_intersect)),(0,0,255),2)
 
-  
-    cv2.imshow("Image lines", image)
-    cv2.imwrite("lines.jpg", image)
-    cv2.waitKey(0)
+        cv2.imshow("Image lines", image)
+        cv2.imwrite("lines.jpg", image)
+        cv2.waitKey(0)
 
-    cv2.destroyAllWindows()
+        cv2.destroyAllWindows()
 
 
     return steering_angle
