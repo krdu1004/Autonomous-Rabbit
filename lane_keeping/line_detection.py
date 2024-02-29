@@ -22,14 +22,12 @@ def line_detection(image,set_width,cut_top):
     height, width, _ = image.shape
     height, width, _ = image.shape
     # print("Height: ", height, "Width: ", width)
-    print(height, width)
     # Crop ROI and resize to 640px widt:
     image = image[int(height*cut_top):, :]
     image = cv2.resize(image, (set_width, int(height/width*set_width)), interpolation = cv2.INTER_AREA)
 
 
     height, width, _ = image.shape
-    print(height, width)
     # print("Height: ", height, "Width: ", width)
 
     # Convert the image to grayscale
