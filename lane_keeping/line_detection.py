@@ -79,11 +79,11 @@ def line_detection(image,set_width,cut_top):
                 # cv2.line(image,(x1,y1),(x2,y2),(255,0,0),2)
                 pass
     else:
-        print("Did not find any lines")
+        # print("Did not find any lines")
         return None
     
     if not (line_left and line_right):
-        print("Did NOT find BOTH lines")
+        # print("Did NOT find BOTH lines")
         return None 
         
     

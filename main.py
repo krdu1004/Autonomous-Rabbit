@@ -76,41 +76,41 @@ for i in range(200): # FOR TESTING, 200 iterations
 
 
 
-# timinig prints:
-times.pop(0)
-print("Final time:", time.time()-s1)
-mean = sum(times) / len(times) 
-variance = sum([((x - mean) ** 2) for x in times]) / (len(times)-1) 
-std = variance ** 0.5
-t=[x for x in range(len(times))]
-plt.plot(t,times)
-plt.show()
-print(mean)
-print(std)
-print()
+# # timinig prints:
+# times.pop(0)
+# print("Final time:", time.time()-s1)
+# mean = sum(times) / len(times) 
+# variance = sum([((x - mean) ** 2) for x in times]) / (len(times)-1) 
+# std = variance ** 0.5
+# t=[x for x in range(len(times))]
+# plt.plot(t,times)
+# plt.show()
+# print(mean)
+# print(std)
+# print()
 
-get_image.pop(0)
-mean = sum(get_image) / len(get_image) 
-variance = sum([((x - mean) ** 2) for x in get_image]) / (len(get_image)-1) 
-std = variance ** 0.5
-t=[x for x in range(len(get_image))]
-plt.plot(t,get_image)
-plt.show()
-print(mean)
-print(std)
-print()
+# get_image.pop(0)
+# mean = sum(get_image) / len(get_image) 
+# variance = sum([((x - mean) ** 2) for x in get_image]) / (len(get_image)-1) 
+# std = variance ** 0.5
+# t=[x for x in range(len(get_image))]
+# plt.plot(t,get_image)
+# plt.show()
+# print(mean)
+# print(std)
+# print()
 
 
-rest.pop(0)
-mean = sum(rest) / len(rest) 
-variance = sum([((x - mean) ** 2) for x in rest]) / (len(rest)-1) 
-std = variance ** 0.5
-t=[x for x in range(len(rest))]
-plt.plot(t,rest)
-plt.show()
-print(mean)
-print(std)
-print()
+# rest.pop(0)
+# mean = sum(rest) / len(rest) 
+# variance = sum([((x - mean) ** 2) for x in rest]) / (len(rest)-1) 
+# std = variance ** 0.5
+# t=[x for x in range(len(rest))]
+# plt.plot(t,rest)
+# plt.show()
+# print(mean)
+# print(std)
+# print()
 
 
 # Disable modules and close camera

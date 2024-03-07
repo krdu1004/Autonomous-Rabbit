@@ -4,6 +4,8 @@
 
 import pyzed.sl as sl
 import ogl_viewer.viewer as gl
+import numpy as np
+from math import isnan
 
 
 
@@ -51,17 +53,37 @@ def init_body_tracking(camera, detection_confidence = 40, show_image = True, det
 
 
 def body_tracking(camera, mat, bodies, viewer, body_runtime_param, show_image):
+    emergency_brake = False
+    speed_reduction = 0     # in % 
     camera.retrieve_bodies(bodies, body_runtime_param) # Retrieve the detected objects
     if show_image:
         print(viewer.is_available())
         viewer.update_view(mat, bodies)
-    if False:
-        for object in objects.object_list:
-            print(object.id,object.position,object.velocity)
-    
-    emergency_brake = False
-    speed = 0   #override/reduce speed based on 
-    return emergency_brake, speed
+    if True:
+        for person in bodies.body_list:
+            
+            # Assuming r and v are numpy arrays representing position and velocity vectors
+            pos = person.position
+            vel = person.velocity
+            if not isnan(vel[0]):
+                r = np.array([pos[0], pos[1]])  # Position vector 2d plane
+                v = np.array([vel[0], vel[1]])  # Velocity vector 2d plane
+
+                # Calculate speed towards origin
+                speed_towards_origin = -np.dot(r / np.linalg.norm(r), v)
+
+                # Calculate distance to origin
+                distance_to_origin = np.linalg.norm(r)
+
+                closest_point = abs(np.cross(r, v)) / np.linalg.norm(v)
+
+                if speed_towards_origin*2 > distance_to_origin and closest_point < 0.5:
+                    print("Emergency brake")
+                    emergency_brake = True
+                    # Get a speed reduction between 0.25 and 1 based on speed and distance due to if.
+                    speed_reduction = min(1, speed_towards_origin/(distance_to_origin*2))
+        
+    return emergency_brake, speed_reduction
 
 # object_2Dbbox = object.bounding_box_2d; # Get the 2D bounding box of the object
 # object_3Dbbox = object.bounding_box; # Get the 3D Bounding Box of the object
