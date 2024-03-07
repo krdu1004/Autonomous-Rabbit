@@ -1,8 +1,9 @@
 from lane_keeping.controller import steering_angle_controller
 from lane_keeping.line_detection import line_detection
 from lane_keeping.PIDController import PIDController
-from people_avoidance.object_detection import object_detection, init_object_detection
-from people_avoidance.body_tracking import init_body_tracking, body_tracking
+from tracking.body_tracking import init_body_tracking
+from emergency_braking import emergency_braking
+
 from camera import camera_init, get_camera_image
 import matplotlib.pyplot as plt
 import pyzed.sl as sl
@@ -17,7 +18,7 @@ import cv2
 # Tunable parameters:
 set_width = 640      
 show_image = False
-fps = 30
+fps = 15
 resolution=sl.RESOLUTION.SVGA
 detection_confidence = 40
 detection_model = sl.BODY_TRACKING_MODEL.HUMAN_BODY_FAST
@@ -25,8 +26,7 @@ detection_model = sl.BODY_TRACKING_MODEL.HUMAN_BODY_FAST
 # Camera init:
 mat, camera, runtime, cam_status = camera_init(fps, resolution)
 
-# viewer, objects, obj_runtime_param = init_object_detection(camera, detection_confidence, show_image, detection_model)
-viewer, objects, obj_runtime_param = init_body_tracking(camera, detection_confidence, show_image, detection_model)
+viewer, bodies, body_runtime_param = init_body_tracking(camera, detection_confidence, show_image, detection_model)
 
 test_image = get_camera_image(mat, camera, runtime)
 print("Camera Status: ", cam_status)
@@ -44,6 +44,7 @@ get_image = []
 rest = []
 # Main loop
 s1 = time.time()
+viewer.update_view(mat, bodies)
 for i in range(200): # FOR TESTING, 200 iterations
     print("---------------")
     s2 = time.time()
@@ -55,10 +56,13 @@ for i in range(200): # FOR TESTING, 200 iterations
 
     s4=time.time()
 
-    # emergency_brake, speed = object_detection(camera, mat, objects, viewer, obj_runtime_param, show_image)
-    emergency_brake, speed = body_tracking(camera, mat, objects, viewer, obj_runtime_param, show_image)
+    camera.retrieve_bodies(bodies, body_runtime_param) # Retrieve the detected objects
+    emergency_brake, speed = emergency_braking(bodies)
 
-    # print("Emergency status:", emergency_brake, "Speed:", speed)
+    # visualization
+    if show_image:
+        viewer.update_view(mat, bodies)
+
     
     if not emergency_brake:
         lane_lines = line_detection(image, set_width, cut_top=1/4)
@@ -67,6 +71,9 @@ for i in range(200): # FOR TESTING, 200 iterations
             steering_angle = steering_angle_controller(image, angle_pid, 
                                                        position_pid, lane_lines)
         # Get SPEED:
+        # ENYA: fix init(både camera og body tracking) og sørg 
+        #       for at du kjører get_camera_image og 
+        #       camera.retrieve_bodies for ditt kamera også.
         
 
     # Send speed and angle to robot:
