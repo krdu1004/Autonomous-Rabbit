@@ -1,22 +1,48 @@
 import socket
+import struct
 
-# Set the IP address and port of the microcontroller
-microcontroller_ip = "192.168.1.2"  # Replace with the actual IP address of your microcontroller
-microcontroller_port = 12345  # Replace with the desired port number
+# IP and port for the computer
+HOST = '169.254.222.165'  # MÅ ENDRES TIL ZED BOX
+PORT = 49152
 
 # Create a socket object
-client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Connect to the microcontroller
-client_socket.connect((microcontroller_ip, microcontroller_port))
+# Bind the socket to the host and port
+server_socket.bind((HOST, PORT))
 
-# Send data to the microcontroller
-data_to_send = "Hello from the computer!"
-client_socket.sendall(data_to_send.encode())
+# Listen for incoming connections
+server_socket.listen(1)
 
-# Receive data from the microcontroller
-received_data = client_socket.recv(1024).decode()
-print(f"Received from microcontroller: {received_data}")
+print('Waiting for connection...')
 
-# Close the socket
+# Accept a connection
+client_socket, addr = server_socket.accept()
+print('Connected by', addr)
+
+while True:
+    # Boolean values
+    redBool = bool(input("Red LED: "))
+    greenBool = bool(input("Green LED: "))
+    brakeBool = bool(input("Brake: "))
+
+    # Floating-point values
+    angle = float(input("Angle: "))
+    speed = float(input("Speed: "))
+
+    # Pack data into byte array
+    data = struct.pack('<3?2f', redBool, greenBool, brakeBool, angle, speed)
+
+    # Send data
+    client_socket.sendall(data)
+
+    # Receive data from the client
+    #data = client_socket.recv(1024)
+    #if not data:
+    #    break
+    #print('Received:', data.decode())
+    #print('Received:', struct.unpack('f', data))
+    #print('Received:', data)
+# Close the connection
 client_socket.close()
+server_socket.close()
