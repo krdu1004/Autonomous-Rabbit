@@ -589,7 +589,7 @@ class GLViewer:
         else:
             return _object_data.tracking_state == sl.OBJECT_TRACKING_STATE.OK or _object_data.tracking_state == sl.OBJECT_TRACKING_STATE.OFF
 
-    def update_view(self, _image, _objs, body=True):       # _objs of type sl.Objects
+    def update_view(self, _image, _objs):       # _objs of type sl.Objects
         self.mutex.acquire()
 
         # update image
@@ -600,35 +600,19 @@ class GLViewer:
         self.BBox_faces.clear()
         self.objects_name = []
 
+        for i in range(len(_objs.body_list)):
+            if self.render_object(_objs.body_list[i]):
+                bounding_box = np.array(_objs.body_list[i].bounding_box)
+                if bounding_box.any():
+                    color_class = get_color_class(0)
+                    color_id = generate_color_id(_objs.body_list[i].id)
+                    if _objs.body_list[i].tracking_state != sl.OBJECT_TRACKING_STATE.OK:
+                        color_id = color_class
+                    else:
+                        pos = [_objs.body_list[i].position[0], _objs.body_list[i].bounding_box[0][1], _objs.body_list[i].position[2]]
+                        self.create_id_rendering(pos, color_id, _objs.body_list[i].id)
 
-        if body:
-            for i in range(len(_objs.body_list)):
-                if self.render_object(_objs.body_list[i]):
-                    bounding_box = np.array(_objs.body_list[i].bounding_box)
-                    if bounding_box.any():
-                        color_class = get_color_class(0)
-                        color_id = generate_color_id(_objs.body_list[i].id)
-                        if _objs.body_list[i].tracking_state != sl.OBJECT_TRACKING_STATE.OK:
-                            color_id = color_class
-                        else:
-                            pos = [_objs.body_list[i].position[0], _objs.body_list[i].bounding_box[0][1], _objs.body_list[i].position[2]]
-                            self.create_id_rendering(pos, color_id, _objs.body_list[i].id)
-
-                        self.create_bbox_rendering(bounding_box, color_id)
-        else:
-            for i in range(len(_objs.object_list)):
-                if self.render_object(_objs.object_list[i]):
-                    bounding_box = np.array(_objs.object_list[i].bounding_box)
-                    if bounding_box.any():
-                        color_class = get_color_class(0)
-                        color_id = generate_color_id(_objs.object_list[i].id)
-                        if _objs.object_list[i].tracking_state != sl.OBJECT_TRACKING_STATE.OK:
-                            color_id = color_class
-                        else:
-                            pos = [_objs.object_list[i].position[0], _objs.object_list[i].bounding_box[0][1], _objs.object_list[i].position[2]]
-                            self.create_id_rendering(pos, color_id, _objs.object_list[i].id)
-
-                        self.create_bbox_rendering(bounding_box, color_id)
+                    self.create_bbox_rendering(bounding_box, color_id)
 
         self.mutex.release()
 
