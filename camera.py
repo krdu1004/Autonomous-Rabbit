@@ -23,7 +23,8 @@ def camera_init(fps=30, resolution=sl.RESOLUTION.SVGA):
     init.camera_resolution = resolution
     init.camera_fps = fps  # The framerate is lowered to avoid any USB3 bandwidth issues
     init.coordinate_units = sl.UNIT.METER
-    init.coordinate_system = sl.COORDINATE_SYSTEM.RIGHT_HANDED_Z_UP_X_FWD
+    # This makes ogl_viewer not work:
+    # init.coordinate_system = sl.COORDINATE_SYSTEM.RIGHT_HANDED_Z_UP_X_FWD
     camera = sl.Camera()
     cam_status = camera.open(init)
 

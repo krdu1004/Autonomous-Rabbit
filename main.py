@@ -61,7 +61,8 @@ for i in range(200): # FOR TESTING, 200 iterations
 
     # visualization
     if show_image:
-        viewer.update_view(mat, bodies)
+        if viewer.is_available():
+            viewer.update_view(mat, bodies)
 
     
     if not emergency_brake:
